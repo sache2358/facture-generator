@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Facture</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        label, input, textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Générateur de Facture</h2>
+    <form id="invoiceForm">
+        <label>Nom de l'entreprise / Prestataire :</label>
+        <input type="text" id="companyName" required>
+        
+        <label>Adresse :</label>
+        <textarea id="address" required></textarea>
+        
+        <label>Nom du client :</label>
+        <input type="text" id="clientName" required>
+        
+        <label>Date de la facture :</label>
+        <input type="date" id="invoiceDate" required>
+        
+        <label>Numéro de facture :</label>
+        <input type="text" id="invoiceNumber" required>
+        
+        <label>Description du produit / service :</label>
+        <textarea id="description" required></textarea>
+        
+        <label>Prix HT :</label>
+        <input type="number" id="priceHT" required>
+        
+        <label>TVA (%) :</label>
+        <input type="number" id="tva" value="20">
+        
+        <button type="button" onclick="generateInvoice()">Télécharger la Facture</button>
+    </form>
+
+    <script>
+        function generateInvoice() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const companyName = document.getElementById("companyName").value;
+            const address = document.getElementById("address").value;
+            const clientName = document.getElementById("clientName").value;
+            const invoiceDate = document.getElementById("invoiceDate").value;
+            const invoiceNumber = document.getElementById("invoiceNumber").value;
+            const description = document.getElementById("description").value;
+            const priceHT = parseFloat(document.getElementById("priceHT").value);
+            const tva = parseFloat(document.getElementById("tva").value);
+            const priceTTC = priceHT + (priceHT * (tva / 100));
+
+            doc.text(`Facture N° ${invoiceNumber}`, 20, 20);
+            doc.text(`Date : ${invoiceDate}`, 20, 30);
+            doc.text(`Entreprise : ${companyName}`, 20, 40);
+            doc.text(`Adresse : ${address}`, 20, 50);
+            doc.text(`Client : ${clientName}`, 20, 60);
+            doc.text(`Description : ${description}`, 20, 80);
+            doc.text(`Prix HT : ${priceHT.toFixed(2)} €`, 20, 90);
+            doc.text(`TVA (${tva}%) : ${(priceHT * (tva / 100)).toFixed(2)} €`, 20, 100);
+            doc.text(`Prix TTC : ${priceTTC.toFixed(2)} €`, 20, 110);
+
+            doc.save(`Facture_${invoiceNumber}.pdf`);
+        }
+    </script>
+</body>
+</html>
