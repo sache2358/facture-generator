@@ -1,155 +1,52 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facture Professionnelle</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        button {
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: block;
-            margin: 20px auto;
-        }
-    </style>
-</head>
-<body>
-    <h2>Facture Professionnelle</h2>
-    <form id="invoiceForm">
-        <label>Nom de l'entreprise :</label>
-        <input type="text" id="companyName" required>
-        
-        <label>Adresse :</label>
-        <textarea id="address" required></textarea>
-        
-        <label>Nom du client :</label>
-        <input type="text" id="clientName" required>
-        
-        <label>Date de la facture :</label>
-        <input type="date" id="invoiceDate" required>
-        
-        <label>Numéro de facture :</label>
-        <input type="text" id="invoiceNumber" required>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Quantité</th>
-                    <th>Prix Unitaire (€)</th>
-                    <th>Total (€)</th>
-                </tr>
-            </thead>
-            <tbody id="invoiceItems">
-                <tr>
-                    <td><input type="text" class="description" required></td>
-                    <td><input type="number" class="quantity" required></td>
-                    <td><input type="number" class="unitPrice" required></td>
-                    <td class="totalPrice">0.00</td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <button type="button" onclick="addItem()">Ajouter un article</button>
-        
-        <label>TVA (%) :</label>
-        <input type="number" id="tva" value="20">
-        
-        <button type="button" onclick="generateInvoice()">Télécharger la Facture</button>
-    </form>
-
-    <script>
-        function addItem() {
-            let tbody = document.getElementById("invoiceItems");
-            let row = document.createElement("tr");
-            row.innerHTML = `
-                <td><input type="text" class="description" required></td>
-                <td><input type="number" class="quantity" required></td>
-                <td><input type="number" class="unitPrice" required></td>
-                <td class="totalPrice">0.00</td>
-            `;
-            tbody.appendChild(row);
-        }
-
-        function generateInvoice() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const companyName = document.getElementById("companyName").value;
-            const address = document.getElementById("address").value;
-            const clientName = document.getElementById("clientName").value;
-            const invoiceDate = document.getElementById("invoiceDate").value;
-            const invoiceNumber = document.getElementById("invoiceNumber").value;
-            const tva = parseFloat(document.getElementById("tva").value);
-            
-            let items = document.querySelectorAll("#invoiceItems tr");
-            let y = 80;
-            let totalHT = 0;
-            
-            doc.text(`Facture N° ${invoiceNumber}`, 20, 20);
-            doc.text(`Date : ${invoiceDate}`, 20, 30);
-            doc.text(`Entreprise : ${companyName}`, 20, 40);
-            doc.text(`Adresse : ${address}`, 20, 50);
-            doc.text(`Client : ${clientName}`, 20, 60);
-            
-            doc.text(`Description`, 20, 70);
-            doc.text(`Quantité`, 90, 70);
-            doc.text(`Prix Unit. (€)`, 130, 70);
-            doc.text(`Total (€)`, 170, 70);
-            
-            items.forEach(item => {
-                let desc = item.querySelector(".description").value;
-                let qty = parseFloat(item.querySelector(".quantity").value);
-                let unitPrice = parseFloat(item.querySelector(".unitPrice").value);
-                let total = qty * unitPrice;
-                totalHT += total;
-                
-                doc.text(`${desc}`, 20, y);
-                doc.text(`${qty}`, 90, y);
-                doc.text(`${unitPrice.toFixed(2)}`, 130, y);
-                doc.text(`${total.toFixed(2)}`, 170, y);
-                y += 10;
-            });
-            
-            let totalTVA = totalHT * (tva / 100);
-            let totalTTC = totalHT + totalTVA;
-            
-            doc.text(`Total HT : ${totalHT.toFixed(2)} €`, 20, y + 10);
-            doc.text(`TVA (${tva}%) : ${totalTVA.toFixed(2)} €`, 20, y + 20);
-            doc.text(`Total TTC : ${totalTTC.toFixed(2)} €`, 20, y + 30);
-            
-            doc.save(`Facture_${invoiceNumber}.pdf`);
-        }
-    </script>
-</body>
-</html>
+{
+  "type": "Facture",
+  "date": "01/01/1984",
+  "invoice_number": "XXXXXX",
+  "invoice_object": "Fusce sapien neque",
+  "my_company": {
+    "name": "Lorem Ipsum",
+    "adress": "1 rue de la mairie, 12345 Lorem",
+    "phone_number": "+33 (0)1 02 03 04 05",
+    "email": "lorem@ipsum.com",
+    "siren": "001 002 003",
+    "bank": {
+      "name":  "Vestibulum orci sapien",
+      "iban":  "XX01 0001 0002 0003 0004 0005 006",
+      "bic" : "XXXXXXXX"
+    }
+  },
+  "tva": {
+    "active": "yes",
+    "rate": "21.30",
+    "text": "T.V.A. 21.30 %"
+  },
+  "customer": {
+    "name": "Lorem",
+    "adress" : "2 rue de la cité, 12345 Lorem",
+    "siren": "123 456 789",
+    "tva_intra" : "FR01 123456789"
+  },
+  "item": [
+    {
+      "description": [
+        { "item": "Vestibulum orci sapien" },
+        { "item": "justo id dignissim varius" }
+      ],
+      "amount": 1,
+      "unit_price": "1.00"
+    },
+    {
+      "description": [
+        { "item": "Vestibulum orci sapien" }
+      ],
+      "amount": 2,
+      "unit_price": "2.00"
+    }
+  ],
+  "limit_date_paiement": "30 jours à réception de facture",
+  "paiement_mode": [
+    { "kind": "- si nécessaire, par chèque à l'ordre de Lorem Ipsum" },
+    { "kind": "- de préférence, par virement sur le compte bancaire suivant :" }
+  ],
+  "legal_information": "Lorem, S.A.R.L. au capital social de XX € - RCS XXX - N° TVA intracommunautaire : FR 01 234 567 890"
+}
