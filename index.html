@@ -3,19 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Facture</title>
+    <title>Facture Professionnelle</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        label, input, textarea {
-            display: block;
+        h2 {
+            text-align: center;
+        }
+        table {
             width: 100%;
-            margin-bottom: 10px;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
         }
         button {
             padding: 10px;
@@ -23,13 +38,15 @@
             color: white;
             border: none;
             cursor: pointer;
+            display: block;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
-    <h2>Générateur de Facture</h2>
+    <h2>Facture Professionnelle</h2>
     <form id="invoiceForm">
-        <label>Nom de l'entreprise / Prestataire :</label>
+        <label>Nom de l'entreprise :</label>
         <input type="text" id="companyName" required>
         
         <label>Adresse :</label>
@@ -44,11 +61,26 @@
         <label>Numéro de facture :</label>
         <input type="text" id="invoiceNumber" required>
         
-        <label>Description du produit / service :</label>
-        <textarea id="description" required></textarea>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantité</th>
+                    <th>Prix Unitaire (€)</th>
+                    <th>Total (€)</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceItems">
+                <tr>
+                    <td><input type="text" class="description" required></td>
+                    <td><input type="number" class="quantity" required></td>
+                    <td><input type="number" class="unitPrice" required></td>
+                    <td class="totalPrice">0.00</td>
+                </tr>
+            </tbody>
+        </table>
         
-        <label>Prix HT :</label>
-        <input type="number" id="priceHT" required>
+        <button type="button" onclick="addItem()">Ajouter un article</button>
         
         <label>TVA (%) :</label>
         <input type="number" id="tva" value="20">
@@ -57,6 +89,18 @@
     </form>
 
     <script>
+        function addItem() {
+            let tbody = document.getElementById("invoiceItems");
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="text" class="description" required></td>
+                <td><input type="number" class="quantity" required></td>
+                <td><input type="number" class="unitPrice" required></td>
+                <td class="totalPrice">0.00</td>
+            `;
+            tbody.appendChild(row);
+        }
+
         function generateInvoice() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -66,21 +110,44 @@
             const clientName = document.getElementById("clientName").value;
             const invoiceDate = document.getElementById("invoiceDate").value;
             const invoiceNumber = document.getElementById("invoiceNumber").value;
-            const description = document.getElementById("description").value;
-            const priceHT = parseFloat(document.getElementById("priceHT").value);
             const tva = parseFloat(document.getElementById("tva").value);
-            const priceTTC = priceHT + (priceHT * (tva / 100));
-
+            
+            let items = document.querySelectorAll("#invoiceItems tr");
+            let y = 80;
+            let totalHT = 0;
+            
             doc.text(`Facture N° ${invoiceNumber}`, 20, 20);
             doc.text(`Date : ${invoiceDate}`, 20, 30);
             doc.text(`Entreprise : ${companyName}`, 20, 40);
             doc.text(`Adresse : ${address}`, 20, 50);
             doc.text(`Client : ${clientName}`, 20, 60);
-            doc.text(`Description : ${description}`, 20, 80);
-            doc.text(`Prix HT : ${priceHT.toFixed(2)} €`, 20, 90);
-            doc.text(`TVA (${tva}%) : ${(priceHT * (tva / 100)).toFixed(2)} €`, 20, 100);
-            doc.text(`Prix TTC : ${priceTTC.toFixed(2)} €`, 20, 110);
-
+            
+            doc.text(`Description`, 20, 70);
+            doc.text(`Quantité`, 90, 70);
+            doc.text(`Prix Unit. (€)`, 130, 70);
+            doc.text(`Total (€)`, 170, 70);
+            
+            items.forEach(item => {
+                let desc = item.querySelector(".description").value;
+                let qty = parseFloat(item.querySelector(".quantity").value);
+                let unitPrice = parseFloat(item.querySelector(".unitPrice").value);
+                let total = qty * unitPrice;
+                totalHT += total;
+                
+                doc.text(`${desc}`, 20, y);
+                doc.text(`${qty}`, 90, y);
+                doc.text(`${unitPrice.toFixed(2)}`, 130, y);
+                doc.text(`${total.toFixed(2)}`, 170, y);
+                y += 10;
+            });
+            
+            let totalTVA = totalHT * (tva / 100);
+            let totalTTC = totalHT + totalTVA;
+            
+            doc.text(`Total HT : ${totalHT.toFixed(2)} €`, 20, y + 10);
+            doc.text(`TVA (${tva}%) : ${totalTVA.toFixed(2)} €`, 20, y + 20);
+            doc.text(`Total TTC : ${totalTTC.toFixed(2)} €`, 20, y + 30);
+            
             doc.save(`Facture_${invoiceNumber}.pdf`);
         }
     </script>
